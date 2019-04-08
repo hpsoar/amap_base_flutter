@@ -4,6 +4,7 @@
 
 #import <Foundation/Foundation.h>
 #import "IMethodHandler.h"
+#import "AMapNaviCompositeManager.h"
 
 
 @interface StartNavi : NSObject <NaviMethodHandler>
