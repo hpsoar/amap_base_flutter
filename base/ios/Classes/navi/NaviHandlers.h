@@ -7,4 +7,5 @@
 
 
 @interface StartNavi : NSObject <NaviMethodHandler>
+@property (nonatomic, strong) AMapNaviCompositeManager *compositeManager;
 @end
