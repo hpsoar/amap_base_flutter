@@ -6,10 +6,12 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import me.yohom.amapbase.map.AMapFactory
 import java.util.concurrent.atomic.AtomicInteger
+import me.yohom.amapbase.common.log
 
 const val CREATED = 1
 const val RESUMED = 3
@@ -41,23 +43,45 @@ class AMapBasePlugin {
                     .setMethodCallHandler { methodCall, result ->
                         when (methodCall.method) {
                             "requestPermission" -> {
-                                permissionRequestCode = methodCall.hashCode()
-                                methodResult = result
+                                if (ContextCompat.checkSelfPermission(registrar.activity(),
+                                                Manifest.permission.ACCESS_COARSE_LOCATION)
+                                        == PackageManager.PERMISSION_GRANTED &&
+                                        ContextCompat.checkSelfPermission(registrar.activity(),
+                                                Manifest.permission.ACCESS_FINE_LOCATION)
+                                        == PackageManager.PERMISSION_GRANTED &&
+                                        ContextCompat.checkSelfPermission(registrar.activity(),
+                                                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                        == PackageManager.PERMISSION_GRANTED &&
+                                        ContextCompat.checkSelfPermission(registrar.activity(),
+                                                Manifest.permission.READ_EXTERNAL_STORAGE)
+                                        == PackageManager.PERMISSION_GRANTED &&
+                                        ContextCompat.checkSelfPermission(registrar.activity(),
+                                                Manifest.permission.READ_PHONE_STATE)
+                                        == PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    log("flutter requestPermission is authed ")
+                                    result.success(true)
+                                } else {
+                                    log("flutter requestPermission not authed ")
+                                    permissionRequestCode = methodCall.hashCode()
+                                    methodResult = result
 
-                                ActivityCompat.requestPermissions(
-                                        registrar.activity(),
-                                        arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
-                                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                                Manifest.permission.READ_EXTERNAL_STORAGE,
-                                                Manifest.permission.READ_PHONE_STATE),
-                                        permissionRequestCode
-                                )
-                                registrar.addRequestPermissionsResultListener { code, _, grantResults ->
-                                    if (code == permissionRequestCode) {
-                                        methodResult?.success(grantResults.all { it == PackageManager.PERMISSION_GRANTED })
+                                    ActivityCompat.requestPermissions(
+                                            registrar.activity(),
+                                            arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
+                                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                                                    Manifest.permission.READ_PHONE_STATE),
+                                            permissionRequestCode
+                                    )
+
+                                    registrar.addRequestPermissionsResultListener { code, _, grantResults ->
+                                        if (code == permissionRequestCode) {
+                                            methodResult?.success(grantResults.all { it == PackageManager.PERMISSION_GRANTED })
+                                        }
+                                        return@addRequestPermissionsResultListener true
                                     }
-                                    return@addRequestPermissionsResultListener true
                                 }
                             }
                             else -> result.notImplemented()
