@@ -9,6 +9,7 @@ import com.amap.api.maps.CoordinateConverter
 import com.amap.api.maps.model.CameraPosition
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.LatLngBounds
+import com.amap.api.maps.model.MyLocationStyle
 import com.amap.api.maps.offlinemap.OfflineMapActivity
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -22,6 +23,230 @@ import java.io.*
 import java.util.*
 
 val beijingLatLng = LatLng(39.941711, 116.382248)
+
+object AddMarker : MapMethodHandler {
+
+    private lateinit var map: AMap
+
+    override fun with(map: AMap): AddMarker {
+        this.map = map
+        return this
+    }
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        val optionsJson = call.argument<String>("markerOptions") ?: "{}"
+
+        log("方法marker#addMarker android端参数: optionsJson -> $optionsJson")
+
+        val markerOptions = optionsJson.parseFieldJson<UnifiedMarkerOptions>()
+
+        val marker = map.addMarker(markerOptions.toMarkerOption())
+        marker.`object` = markerOptions.`object`
+
+        result.success(success)
+    }
+}
+
+object AddMarkers : MapMethodHandler {
+
+    private lateinit var map: AMap
+
+    override fun with(map: AMap): AddMarkers {
+        this.map = map
+        return this
+    }
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        val moveToCenter = call.argument<Boolean>("moveToCenter") ?: false
+        val optionsListJson = call.argument<String>("markerOptionsList") ?: "[]"
+        val clear = call.argument<Boolean>("clear") ?: false
+
+        log("方法marker#addMarkers android端参数: optionsListJson -> $optionsListJson")
+
+        val unifiedMarkerOptions = optionsListJson.parseFieldJson<List<UnifiedMarkerOptions>>()
+
+        val optionsList = ArrayList(unifiedMarkerOptions.map { it.toMarkerOption() })
+
+        if (clear) map.mapScreenMarkers.forEach { it.remove() }
+
+        val markers = map.addMarkers(optionsList, moveToCenter)
+
+        markers.forEachIndexed {index, marker -> marker.`object` = unifiedMarkerOptions[index].`object` }
+
+        result.success(success)
+    }
+}
+
+object AddPolygon : MapMethodHandler {
+    private lateinit var map: AMap
+
+    override fun with(map: AMap): MapMethodHandler {
+        this.map = map
+        return this
+    }
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        val optionsJson = call.argument<String>("options") ?: "{}"
+
+        log("方法map#addPolygon android端参数: polygonOptions -> $optionsJson")
+
+        optionsJson.parseFieldJson<UnifiedPolygonOptions>().applyTo(map)
+
+        result.success(success)
+    }
+}
+
+object AddPolyline : MapMethodHandler {
+    private lateinit var map: AMap
+
+    override fun with(map: AMap): MapMethodHandler {
+        this.map = map
+        return this
+    }
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        val options = call.argument<String>("options")?.parseFieldJson<UnifiedPolylineOptions>()
+
+        log("map#AddPolyline android端参数: options -> $options")
+
+        options?.applyTo(map)
+
+        result.success(success)
+    }
+}
+
+object ClearMarker : MapMethodHandler {
+
+    private lateinit var map: AMap
+
+    override fun with(map: AMap): ClearMarker {
+        this.map = map
+        return this
+    }
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        map.mapScreenMarkers.forEach { it.remove() }
+
+        result.success(success)
+    }
+}
+
+object ClearMap : MapMethodHandler {
+
+    private lateinit var map: AMap
+
+    override fun with(map: AMap): ClearMap {
+        this.map = map
+        return this
+    }
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        map.clear()
+
+        result.success(success)
+    }
+}
+
+object CalcDistance : MapMethodHandler {
+    private lateinit var map: AMap
+
+    override fun with(map: AMap): CalcDistance {
+        this.map = map
+        return this
+    }
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        val p1 = call.argument<Map<String, Any>>("p1")
+        val p2 = call.argument<Map<String, Any>>("p2")
+        val latlng1 = p1!!.getLntlng()
+        val latlng2 = p2!!.getLntlng()
+        val dis = AMapUtils.calculateLineDistance(latlng1, latlng2)
+        result.success(dis)
+    }
+
+    private fun Map<String, Any>.getLntlng(): LatLng {
+        val lat = get("latitude") as Double
+        val lng = get("longitude") as Double
+        return LatLng(lat, lng)
+    }
+}
+
+object ChangeLatLng : MapMethodHandler {
+
+    private lateinit var map: AMap
+
+    override fun with(map: AMap): ChangeLatLng {
+        this.map = map
+        return this
+    }
+
+    override fun onMethodCall(methodCall: MethodCall, methodResult: MethodChannel.Result) {
+        val targetJson = methodCall.argument<String>("target") ?: "{}"
+
+        map.animateCamera(CameraUpdateFactory.changeLatLng(targetJson.parseFieldJson<LatLng>()))
+
+        methodResult.success(success)
+    }
+}
+
+object ConvertCoordinate : MapMethodHandler {
+
+    private lateinit var map: AMap
+
+    private val types = arrayListOf(
+            CoordinateConverter.CoordType.GPS,
+            CoordinateConverter.CoordType.BAIDU,
+            CoordinateConverter.CoordType.MAPBAR,
+            CoordinateConverter.CoordType.MAPABC,
+            CoordinateConverter.CoordType.SOSOMAP,
+            CoordinateConverter.CoordType.ALIYUN,
+            CoordinateConverter.CoordType.GOOGLE
+    )
+
+    override fun with(map: AMap): ConvertCoordinate {
+        this.map = map
+        return this
+    }
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        val lat = call.argument<Double>("lat")!!
+        val lon = call.argument<Double>("lon")!!
+        val typeIndex = call.argument<Int>("type")!!
+        val amapCoordinate = CoordinateConverter(AMapBaseMapPlugin.registrar.context())
+                .from(types[typeIndex])
+                .coord(LatLng(lat, lon, false))
+                .convert()
+
+        result.success(amapCoordinate.toFieldJson())
+    }
+}
+
+object GetCenterLnglat : MapMethodHandler {
+    private lateinit var map: AMap
+    override fun with(map: AMap): MapMethodHandler {
+        this.map = map
+        return this
+    }
+
+    override fun onMethodCall(methodCall: MethodCall, methodResult: MethodChannel.Result) {
+        val target = map.cameraPosition.target
+        methodResult.success(target.toFieldJson())
+    }
+}
+
+object OpenOfflineManager : MapMethodHandler {
+
+    override fun with(map: AMap): MapMethodHandler {
+        return this
+    }
+
+    override fun onMethodCall(p0: MethodCall?, p1: MethodChannel.Result?) {
+        registrar.activity().startActivity(
+                Intent(AMapBaseMapPlugin.registrar.activity(),
+                        OfflineMapActivity::class.java)
+        )
+    }
+}
 
 object SetCustomMapStyleID : MapMethodHandler {
     private lateinit var map: AMap
@@ -110,95 +335,9 @@ object SetMapCustomEnable : MapMethodHandler {
     }
 }
 
-object ConvertCoordinate : MapMethodHandler {
-
-    lateinit var map: AMap
-
-    private val types = arrayListOf(
-            CoordinateConverter.CoordType.GPS,
-            CoordinateConverter.CoordType.BAIDU,
-            CoordinateConverter.CoordType.MAPBAR,
-            CoordinateConverter.CoordType.MAPABC,
-            CoordinateConverter.CoordType.SOSOMAP,
-            CoordinateConverter.CoordType.ALIYUN,
-            CoordinateConverter.CoordType.GOOGLE
-    )
-
-    override fun with(map: AMap): ConvertCoordinate {
-        this.map = map
-        return this
-    }
-
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        val lat = call.argument<Double>("lat")!!
-        val lon = call.argument<Double>("lon")!!
-        val typeIndex = call.argument<Int>("type")!!
-        val amapCoordinate = CoordinateConverter(AMapBaseMapPlugin.registrar.context())
-                .from(types[typeIndex])
-                .coord(LatLng(lat, lon, false))
-                .convert()
-
-        result.success(amapCoordinate.toFieldJson())
-    }
-}
-
-object CalcDistance : MapMethodHandler {
-    lateinit var map: AMap
-
-    override fun with(map: AMap): CalcDistance {
-        this.map = map
-        return this
-    }
-
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        val p1 = call.argument<Map<String, Any>>("p1")
-        val p2 = call.argument<Map<String, Any>>("p2")
-        val latlng1 = p1!!.getLntlng()
-        val latlng2 = p2!!.getLntlng()
-        val dis = AMapUtils.calculateLineDistance(latlng1, latlng2)
-        result.success(dis)
-    }
-
-    private fun Map<String, Any>.getLntlng(): LatLng {
-        val lat = get("latitude") as Double
-        val lng = get("longitude") as Double
-        return LatLng(lat, lng)
-    }
-}
-
-object ClearMap : MapMethodHandler {
-
-    lateinit var map: AMap
-
-    override fun with(map: AMap): ClearMap {
-        this.map = map
-        return this
-    }
-
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        map.clear()
-
-        result.success(success)
-    }
-}
-
-object OpenOfflineManager : MapMethodHandler {
-
-    override fun with(map: AMap): MapMethodHandler {
-        return this
-    }
-
-    override fun onMethodCall(p0: MethodCall?, p1: MethodChannel.Result?) {
-        AMapBaseMapPlugin.registrar.activity().startActivity(
-                Intent(AMapBaseMapPlugin.registrar.activity(),
-                        OfflineMapActivity::class.java)
-        )
-    }
-}
-
 object SetLanguage : MapMethodHandler {
 
-    lateinit var map: AMap
+    private lateinit var map: AMap
 
     override fun with(map: AMap): SetLanguage {
         this.map = map
@@ -218,7 +357,7 @@ object SetLanguage : MapMethodHandler {
 
 object SetMapType : MapMethodHandler {
 
-    lateinit var map: AMap
+    private lateinit var map: AMap
 
     override fun with(map: AMap): SetMapType {
         this.map = map
@@ -238,7 +377,7 @@ object SetMapType : MapMethodHandler {
 
 object SetMyLocationStyle : MapMethodHandler {
 
-    lateinit var map: AMap
+    private lateinit var map: AMap
 
     override fun with(map: AMap): SetMyLocationStyle {
         this.map = map
@@ -258,7 +397,7 @@ object SetMyLocationStyle : MapMethodHandler {
 
 object SetUiSettings : MapMethodHandler {
 
-    lateinit var map: AMap
+    private lateinit var map: AMap
 
     override fun with(map: AMap): SetUiSettings {
         this.map = map
@@ -278,7 +417,7 @@ object SetUiSettings : MapMethodHandler {
 
 object ShowIndoorMap : MapMethodHandler {
 
-    lateinit var map: AMap
+    private lateinit var map: AMap
 
     override fun with(map: AMap): ShowIndoorMap {
         this.map = map
@@ -296,119 +435,30 @@ object ShowIndoorMap : MapMethodHandler {
     }
 }
 
-object AddMarker : MapMethodHandler {
+object ShowMyLocation : MapMethodHandler {
 
-    lateinit var map: AMap
+    private lateinit var map: AMap
 
-    override fun with(map: AMap): AddMarker {
+    override fun with(map: AMap): ShowMyLocation {
         this.map = map
         return this
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        val optionsJson = call.argument<String>("markerOptions") ?: "{}"
+        val show = call.argument<Boolean>("show") ?: false
 
-        log("方法marker#addMarker android端参数: optionsJson -> $optionsJson")
+        log("方法map#showMyLocation android端参数: show -> $show")
 
-        optionsJson.parseFieldJson<UnifiedMarkerOptions>().applyTo(map)
-
-        result.success(success)
-    }
-}
-
-object AddMarkers : MapMethodHandler {
-
-    lateinit var map: AMap
-
-    override fun with(map: AMap): AddMarkers {
-        this.map = map
-        return this
-    }
-
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        val moveToCenter = call.argument<Boolean>("moveToCenter") ?: true
-        val optionsListJson = call.argument<String>("markerOptionsList") ?: "[]"
-        val clear = call.argument<Boolean>("clear") ?: false
-
-        log("方法marker#addMarkers android端参数: optionsListJson -> $optionsListJson")
-
-        val optionsList = ArrayList(optionsListJson.parseFieldJson<List<UnifiedMarkerOptions>>().map { it.toMarkerOption() })
-        if (clear) map.mapScreenMarkers.forEach { it.remove() }
-        map.addMarkers(optionsList, moveToCenter)
+        map.isMyLocationEnabled = show
+        map.myLocationStyle = MyLocationStyle().apply { showMyLocation(show) }
 
         result.success(success)
-    }
-}
-
-object AddPolyline : MapMethodHandler {
-    lateinit var map: AMap
-
-    override fun with(map: AMap): MapMethodHandler {
-        this.map = map
-        return this
-    }
-
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        val options = call.argument<String>("options")?.parseFieldJson<UnifiedPolylineOptions>()
-
-        log("map#AddPolyline android端参数: options -> $options")
-
-        options?.applyTo(map)
-
-        result.success(success)
-    }
-}
-
-object ClearMarker : MapMethodHandler {
-
-    lateinit var map: AMap
-
-    override fun with(map: AMap): ClearMarker {
-        this.map = map
-        return this
-    }
-
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        map.mapScreenMarkers.forEach { it.remove() }
-
-        result.success(success)
-    }
-}
-
-object ChangeLatLng : MapMethodHandler {
-
-    lateinit var map: AMap
-
-    override fun with(map: AMap): ChangeLatLng {
-        this.map = map
-        return this
-    }
-
-    override fun onMethodCall(methodCall: MethodCall, methodResult: MethodChannel.Result) {
-        val targetJson = methodCall.argument<String>("target") ?: "{}"
-
-        map.animateCamera(CameraUpdateFactory.changeLatLng(targetJson.parseFieldJson<LatLng>()))
-
-        methodResult.success(success)
-    }
-}
-
-object GetCenterLnglat : MapMethodHandler {
-    lateinit var map: AMap
-    override fun with(map: AMap): MapMethodHandler {
-        this.map = map
-        return this
-    }
-
-    override fun onMethodCall(methodCall: MethodCall, methodResult: MethodChannel.Result) {
-        val target = map.cameraPosition.target
-        methodResult.success(target.toFieldJson())
     }
 }
 
 object SetMapStatusLimits : MapMethodHandler {
 
-    lateinit var map: AMap
+    private lateinit var map: AMap
 
     override fun with(map: AMap): SetMapStatusLimits {
         this.map = map
@@ -427,7 +477,7 @@ object SetMapStatusLimits : MapMethodHandler {
 
 object SetPosition : MapMethodHandler {
 
-    lateinit var map: AMap
+    private lateinit var map: AMap
 
     override fun with(map: AMap): SetPosition {
         this.map = map
@@ -449,7 +499,7 @@ object SetPosition : MapMethodHandler {
 
 object SetZoomLevel : MapMethodHandler {
 
-    lateinit var map: AMap
+    private lateinit var map: AMap
 
     override fun with(map: AMap): SetZoomLevel {
         this.map = map
@@ -465,35 +515,8 @@ object SetZoomLevel : MapMethodHandler {
     }
 }
 
-object ZoomToSpan : MapMethodHandler {
-
-    lateinit var map: AMap
-
-    override fun with(map: AMap): ZoomToSpan {
-        this.map = map
-        return this
-    }
-
-    override fun onMethodCall(methodCall: MethodCall, methodResult: MethodChannel.Result) {
-        val boundJson = methodCall.argument<String>("bound") ?: "[]"
-        val padding = methodCall.argument<Int>("padding") ?: 80
-
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(
-                LatLngBounds.builder().run {
-                    boundJson.parseFieldJson<List<LatLng>>().forEach {
-                        include(it)
-                    }
-                    build()
-                },
-                padding
-        ))
-
-        methodResult.success(success)
-    }
-}
-
 object ScreenShot : MapMethodHandler {
-    lateinit var map: AMap
+    private lateinit var map: AMap
     override fun with(map: AMap): MapMethodHandler {
         this.map = map
         return this
@@ -518,5 +541,32 @@ object ScreenShot : MapMethodHandler {
                 }
             }
         })
+    }
+}
+
+object ZoomToSpan : MapMethodHandler {
+
+    private lateinit var map: AMap
+
+    override fun with(map: AMap): ZoomToSpan {
+        this.map = map
+        return this
+    }
+
+    override fun onMethodCall(methodCall: MethodCall, methodResult: MethodChannel.Result) {
+        val boundJson = methodCall.argument<String>("bound") ?: "[]"
+        val padding = methodCall.argument<Int>("padding") ?: 80
+
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(
+                LatLngBounds.builder().run {
+                    boundJson.parseFieldJson<List<LatLng>>().forEach {
+                        include(it)
+                    }
+                    build()
+                },
+                padding
+        ))
+
+        methodResult.success(success)
     }
 }

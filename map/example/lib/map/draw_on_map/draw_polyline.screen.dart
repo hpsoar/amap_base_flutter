@@ -1,6 +1,5 @@
-import 'package:amap_base_example/utils/misc.dart';
-import 'package:amap_base_example/utils/view.dart';
 import 'package:amap_base_map/amap_base_map.dart';
+import 'package:decorated_flutter/decorated_flutter.dart';
 import 'package:flutter/material.dart';
 
 const polylineList = const [
@@ -32,7 +31,7 @@ class _DrawPolylineScreenState extends State<DrawPolylineScreen> {
       ),
       body: AMapView(
         onAMapViewCreated: (controller) {
-          _controller = controller;
+          _controller = controller..setZoomLevel(10);
           loading(
             context,
             controller.addPolyline(
@@ -41,7 +40,7 @@ class _DrawPolylineScreenState extends State<DrawPolylineScreen> {
                 color: Colors.red,
                 isDottedLine: true,
                 isGeodesic: true,
-                dottedLineType: PolylineOptions.DOTTED_LINE_TYPE_CIRCLE,
+                dottedLineType: DOTTED_LINE_TYPE_CIRCLE,
                 width: 10,
               ),
             ),

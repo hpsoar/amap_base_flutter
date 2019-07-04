@@ -6,6 +6,7 @@
 #import "IMethodHandler.h"
 #import "AMapNaviCompositeManager.h"
 
+@class AMapNaviCompositeManager;
 
 @interface StartNavi : NSObject <NaviMethodHandler>
 @property (nonatomic, strong) AMapNaviCompositeManager *compositeManager;

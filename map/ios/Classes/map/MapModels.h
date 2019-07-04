@@ -5,23 +5,26 @@
 #import <Foundation/Foundation.h>
 #import "MAPointAnnotation.h"
 #import "MAPolyline.h"
+#import "MAPolygon.h"
 
 @class UnifiedMarkerOptions;
 @class LatLng;
 @class CameraPosition;
 @class UnifiedPolylineOptions;
 @class MAMapView;
-
+@class UnifiedPolygonOptions;
 
 @interface MarkerAnnotation : MAPointAnnotation
 @property(nonatomic) UnifiedMarkerOptions *markerOptions;
 @end
 
+@interface PolygonOverlay : MAPolygon
+@property(nonatomic) UnifiedPolygonOptions *polygonOptions;
+@end
 
 @interface PolylineOverlay : MAPolyline
 @property(nonatomic) UnifiedPolylineOptions *options;
 @end
-
 
 @interface UnifiedAMapOptions : NSObject
 /// “高德地图”Logo的位置
@@ -80,12 +83,13 @@
 @property(nonatomic) CGFloat latitude;
 @property(nonatomic) CGFloat longitude;
 
++ (instancetype)initWithCLLocationCoordinate2D:(CLLocationCoordinate2D)coordinate;
+
 - (CLLocationCoordinate2D)toCLLocationCoordinate2D;
 
 - (NSString *)description;
 
 @end
-
 
 @interface UnifiedMarkerOptions : NSObject
 /// Marker覆盖物的图标
@@ -126,11 +130,14 @@
 @property(nonatomic) NSString *leftCalloutAccessoryView;
 /// 显示在默认弹出框右侧的view [暂未实现]
 @property(nonatomic) NSString *rightCalloutAccessoryView;
+/// 自定义信息
+@property(nonatomic) id object;
+/// 自定义信息
+@property(nonatomic) NSString *id;
 
 - (NSString *)description;
 
 @end
-
 
 @interface UnifiedMyLocationStyle : NSObject
 /// 圆形区域（以定位位置为圆心，定位半径的圆形区域）的填充颜色值
@@ -159,7 +166,6 @@
 - (void)applyTo:(MAMapView *)mapView;
 
 @end
-
 
 @interface UnifiedPolylineOptions : NSObject
 
@@ -192,8 +198,7 @@
 
 @end
 
-
-@interface UnifiedUiSettings: NSObject
+@interface UnifiedUiSettings : NSObject
 /// 设置缩放按钮的位置
 @property(nonatomic) NSInteger zoomPosition;
 /// 指南针
@@ -212,5 +217,20 @@
 @property(nonatomic) BOOL isTiltGesturesEnabled;
 
 - (void)applyTo:(MAMapView *)map;
+
+@end
+
+@interface UnifiedPolygonOptions : NSObject
+
++ (instancetype)initWithJson:(NSString *)json;
+
+@property(nonatomic) NSArray<LatLng *> *points;
+@property(nonatomic) CGFloat strokeWidth;
+@property(nonatomic) NSString *strokeColor;
+@property(nonatomic) NSString *fillColor;
+@property(nonatomic) NSUInteger lineJoinType;
+@property(nonatomic) NSUInteger lineCapType;
+@property(nonatomic) CGFloat miterLimit;
+@property(nonatomic) NSUInteger lineDashType;
 
 @end

@@ -1,6 +1,9 @@
-import 'package:amap_base_example/utils/utils.export.dart';
+import 'dart:async';
+
+import 'package:amap_base_core/amap_base_core.dart';
 import 'package:amap_base_example/widgets/setting.widget.dart';
 import 'package:amap_base_map/amap_base_map.dart';
+import 'package:decorated_flutter/decorated_flutter.dart';
 import 'package:flutter/material.dart';
 
 class ShowMapScreen extends StatefulWidget {
@@ -15,6 +18,7 @@ class ShowMapScreen extends StatefulWidget {
 class _ShowMapScreenState extends State<ShowMapScreen> {
   AMapController _controller;
   MyLocationStyle _myLocationStyle = MyLocationStyle();
+  StreamSubscription _subscription;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +30,8 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
             child: AMapView(
               onAMapViewCreated: (controller) {
                 _controller = controller;
+                _subscription = _controller.mapClickedEvent
+                    .listen((it) => print('地图点击: 坐标: $it'));
               },
               amapOptions: AMapOptions(
                 compassEnabled: false,
@@ -175,7 +181,7 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
                     ),
                     BooleanSetting(
                       head: '内部蓝色圆点是否使用律动效果, 默认YES [iOS]',
-                      selected: _myLocationStyle.enablePulseAnnimation,
+                      selected: _myLocationStyle.enablePulseAnimation,
                       onSelected: (value) {
                         _updateMyLocationStyle(context,
                             enablePulseAnnimation: value);
@@ -224,8 +230,7 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
         showsHeadingIndicator: showsHeadingIndicator,
         locationDotBgColor: locationDotBgColor,
         locationDotFillColor: locationDotFillColor,
-        enablePulseAnnimation: enablePulseAnnimation,
-        image: image,
+        enablePulseAnimation: enablePulseAnnimation,
       );
       _controller.setMyLocationStyle(_myLocationStyle);
     } else {
@@ -235,7 +240,8 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
+    _subscription?.cancel();
     super.dispose();
   }
 }
