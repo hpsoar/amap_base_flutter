@@ -16,13 +16,6 @@
   }
   return _compositeManager;
 }
-- (AMapNaviCompositeManager *)compositeManager {
-    if (!_compositeManager) {
-        _compositeManager = [[AMapNaviCompositeManager alloc] init]; // 初始化
-        _compositeManager.delegate = self; // 如果需要使用AMapNaviCompositeManagerDelegate的相关回调（如自定义语音、获取实时位置等），需要设置delegate
-    }
-    return _compositeManager;
-}
 
 - (void)onMethodCall:(FlutterMethodCall *)call :(FlutterResult)result {
   if ([AMapServices sharedServices].apiKey == nil) {
@@ -38,13 +31,13 @@
   // 参考 https://lbs.amap.com/api/ios-navi-sdk/guide/navi-component/use-navi-component
   NSInteger naviType = [paramDic[@"naviType"] integerValue];
 
-    NSLog(@"lat: %f, lon: %f", lat, lon);
-    AMapNaviCompositeUserConfig *config = [[AMapNaviCompositeUserConfig alloc] init];
-    [config setRoutePlanPOIType:AMapNaviRoutePlanPOITypeEnd
-                       location:[AMapNaviPoint locationWithLatitude:lat longitude:lon]
-                           name:@""
-                          POIId:nil];
-    [self.compositeManager presentRoutePlanViewControllerWithOptions:config];
+  NSLog(@"lat: %f, lon: %f", lat, lon);
+  AMapNaviCompositeUserConfig *config = [[AMapNaviCompositeUserConfig alloc] init];
+  [config setRoutePlanPOIType:AMapNaviRoutePlanPOITypeEnd
+                     location:[AMapNaviPoint locationWithLatitude:lat longitude:lon]
+                         name:@""
+                        POIId:nil];
+  [self.compositeManager presentRoutePlanViewControllerWithOptions:config];
 }
 
 @end
