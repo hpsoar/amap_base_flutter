@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:amap_base_core/amap_base_core.dart';
 import 'package:amap_base/amap_base.dart';
+import 'package:amap_base/src/common/log.dart';
 import 'package:amap_base/src/search/model/bus_station_result.dart';
 import 'package:amap_base/src/search/model/drive_route_result.dart';
 import 'package:amap_base/src/search/model/poi_item.dart';
@@ -183,7 +183,7 @@ class AMapSearch {
     final result =
         await _searchChannel.invokeMethod("tool#districtSearch", params);
 
-    return DistrictSearchResult.fromJson(jsonDecode(result));
+    return DistricthResult.fromJson(jsonDecode(result));
   }
 
   /// 公交站点查询

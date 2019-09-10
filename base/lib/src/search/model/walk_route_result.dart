@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:amap_base_core/amap_base_core.dart';
+import 'package:amap_base/amap_base.dart';
 
 class WalkRouteResult {
   List<WalkPath> paths;
