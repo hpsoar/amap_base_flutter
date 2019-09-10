@@ -1,13 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:amap_base_core/amap_base_core.dart';
 import 'package:amap_base/amap_base.dart';
-import 'package:amap_base/src/common/log.dart';
 import 'package:amap_base/src/search/model/bus_station_result.dart';
 import 'package:amap_base/src/search/model/drive_route_result.dart';
 import 'package:amap_base/src/search/model/poi_item.dart';
 import 'package:amap_base/src/search/model/poi_result.dart';
+import 'package:amap_base/src/search/model/district_result.dart';
 import 'package:amap_base/src/search/model/regeocode_result.dart';
+import 'package:amap_base/src/search/model/walk_route_result.dart';
 import 'package:amap_base/src/search/model_ios/bus_station_result.ios.dart';
 import 'package:flutter/services.dart';
 
@@ -100,8 +103,20 @@ class AMapSearch {
           {'routePlanParam': _routePlanParam},
         )
         .then((result) => result as String)
-        .then(
-            (jsonResult) => DriveRouteResult.fromJson(jsonDecode(jsonResult)));
+        .then((json) => DriveRouteResult.fromJson(jsonDecode(json)));
+  }
+
+  /// 计算驾驶路线
+  Future<WalkRouteResult> calculateWalkRoute(RoutePlanParam param) {
+    final _routePlanParam = param.toJsonString();
+    L.p('方法calculateWalkRoute dart端参数: _routePlanParam -> $_routePlanParam');
+    return _searchChannel
+        .invokeMethod(
+          'search#calculateWalkRoute',
+          {'routePlanParam': _routePlanParam},
+        )
+        .then((result) => result as String)
+        .then((json) => WalkRouteResult.fromJson(jsonDecode(json)));
   }
 
   /// 地址转坐标 [name]表示地址，第二个参数表示查询城市，中文或者中文全拼，citycode、adcode
@@ -158,6 +173,17 @@ class AMapSearch {
     List<dynamic> result =
         await _searchChannel.invokeMethod("tool#distanceSearch", params);
     return result.map((v) => v as int).toList();
+  }
+
+  Future<void> districtSearch(String keyword) async {
+    Map<String, dynamic> params = {
+      "keywords": keyword ?? '',
+    };
+
+    final result =
+        await _searchChannel.invokeMethod("tool#districtSearch", params);
+
+    return DistrictSearchResult.fromJson(jsonDecode(result));
   }
 
   /// 公交站点查询

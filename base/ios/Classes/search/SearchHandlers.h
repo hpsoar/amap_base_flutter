@@ -34,8 +34,17 @@
 @interface CalculateDriveRoute : NSObject <SearchMethodHandler, AMapSearchDelegate>
 @end
 
+@interface CalculateWalkRoute : NSObject <SearchMethodHandler, AMapSearchDelegate>
+@end
+
 @interface DistanceSearch : NSObject <SearchMethodHandler, AMapSearchDelegate>
 @end
 
 @interface SearchBusStation : NSObject <SearchMethodHandler, AMapSearchDelegate>
+@end
+
+@interface DistrictSearch : NSObject <SearchMethodHandler, AMapSearchDelegate>
+
+- (void)doSearch:(NSDictionary *)paramDic;
+
 @end
