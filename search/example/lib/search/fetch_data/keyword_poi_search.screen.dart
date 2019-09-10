@@ -66,6 +66,8 @@ class _KeywordPoiSearchScreenState extends State<KeywordPoiSearchScreen> {
                   return;
                 }
 
+                final r = await AMapSearch().districtSearch('');
+
                 loading(
                   context,
                   AMapSearch().searchPoi(

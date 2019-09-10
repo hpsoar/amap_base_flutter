@@ -8,6 +8,7 @@ import 'package:amap_base_search/src/search/model/bus_station_result.dart';
 import 'package:amap_base_search/src/search/model/drive_route_result.dart';
 import 'package:amap_base_search/src/search/model/poi_item.dart';
 import 'package:amap_base_search/src/search/model/poi_result.dart';
+import 'package:amap_base_search/src/search/model/district_result.dart';
 import 'package:amap_base_search/src/search/model/regeocode_result.dart';
 import 'package:amap_base_search/src/search/model_ios/bus_station_result.ios.dart';
 import 'package:flutter/services.dart';
@@ -173,6 +174,17 @@ class AMapSearch {
     List<dynamic> result =
         await _searchChannel.invokeMethod("tool#distanceSearch", params);
     return result.map((v) => v as int).toList();
+  }
+
+  Future<void> districtSearch(String keyword) async {
+    Map<String, dynamic> params = {
+      "keywords": keyword ?? '',
+    };
+
+    final result =
+        await _searchChannel.invokeMethod("tool#districtSearch", params);
+
+    return DistrictSearchResult.fromJson(jsonDecode(result));
   }
 
   /// 公交站点查询
