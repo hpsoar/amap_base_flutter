@@ -150,6 +150,7 @@
   UnifiedPoiSearchQuery *request = [UnifiedPoiSearchQuery mj_objectWithKeyValues:query];
 
   [_search AMapPOIAroundSearch:[request toAMapPOIAroundSearchRequest]];
+    
 }
 
 /// poi搜索回调
@@ -214,7 +215,7 @@
 
 @implementation SearchPoiKeyword {
   AMapSearchAPI *_search;
-  FlutterResult _result;
+  FlutterResult _result;    
 }
 - (instancetype)init {
   self = [super init];
@@ -617,3 +618,61 @@
 }
 
 @end
+
+
+@implementation DistrictSearch {
+    AMapSearchAPI *_search;
+    FlutterResult _result;
+}
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        // 搜索api回调设置
+        _search = [[AMapSearchAPI alloc] init];
+        _search.delegate = self;
+    }
+    
+    return self;
+}
+
+- (void)onMethodCall:(FlutterMethodCall *)call :(FlutterResult)result {
+    _result = result;
+    
+    NSDictionary *paramDic = call.arguments;
+    
+    [self doSearch:paramDic];
+}
+
+- (void)doSearch:(NSDictionary *)paramDic {
+    NSString *keywords = (NSString *) paramDic[@"keywords"];
+    
+    NSLog(@"方法search#DistrictSearch ios端参数: %@", keywords);
+    
+    AMapDistrictSearchRequest *request = [[AMapDistrictSearchRequest alloc] init];
+    request.keywords = keywords;
+    
+    [_search AMapDistrictSearch:request];
+}
+
+/// 地区v搜索回调
+- (void)onDistrictSearchDone:(AMapDistrictSearchRequest *)request response:(AMapDistrictSearchResponse *)response {
+    if (response.districts.count == 0) {
+        return _result([FlutterError errorWithCode:@"没有搜索到结果"
+                                           message:@"没有搜索到结果"
+                                           details:@"没有搜索到结果"]);
+    }
+    
+    NSLog(@"%@", [response mj_JSONString]);
+    _result([response mj_JSONString]);
+}
+
+/// 搜索失败回调
+- (void)AMapSearchRequest:(id)request didFailWithError:(NSError *)error {
+    _result([FlutterError errorWithCode:[NSString stringWithFormat:@"%d", error.code]
+                                message:[Misc toAMapErrorDesc:error.code]
+                                details:nil]);
+}
+
+@end
+

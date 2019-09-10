@@ -42,3 +42,9 @@
 
 @interface SearchBusStation : NSObject <SearchMethodHandler, AMapSearchDelegate>
 @end
+
+@interface DistrictSearch : NSObject <SearchMethodHandler, AMapSearchDelegate>
+
+- (void)doSearch:(NSDictionary *)paramDic;
+
+@end

@@ -72,6 +72,9 @@ class _KeywordPoiSearchScreenState extends State<KeywordPoiSearchScreen> {
                     PoiSearchQuery(
                       query: _queryController.text,
                       city: _cityController.text,
+                      distanceSort: true,
+                      location: LatLng(40.179122, 116.651004),
+                      requireExtension: true,
                     ),
                   ),
                 ).then((poiResult) {
