@@ -175,7 +175,7 @@ class AMapSearch {
     return result.map((v) => v as int).toList();
   }
 
-  Future<void> districtSearch(String keyword) async {
+  Future<DistricthResult> districtSearch(String keyword) async {
     Map<String, dynamic> params = {
       "keywords": keyword ?? '',
     };
