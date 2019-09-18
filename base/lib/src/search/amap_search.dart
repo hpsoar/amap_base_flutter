@@ -9,6 +9,7 @@ import 'package:amap_base/src/search/model/drive_route_result.dart';
 import 'package:amap_base/src/search/model/poi_item.dart';
 import 'package:amap_base/src/search/model/poi_result.dart';
 import 'package:amap_base/src/search/model/district_result.dart';
+import 'package:amap_base/src/search/model/district_result_android.dart';
 import 'package:amap_base/src/search/model/regeocode_result.dart';
 import 'package:amap_base/src/search/model/walk_route_result.dart';
 import 'package:amap_base/src/search/model_ios/bus_station_result.ios.dart';
@@ -177,7 +178,7 @@ class AMapSearch {
     return result.map((v) => v as int).toList();
   }
 
-  Future<DistricthResult> districtSearch(String keyword) async {
+  Future<DistrictResult> districtSearch(String keyword) async {
     Map<String, dynamic> params = {
       "keywords": keyword ?? '',
     };
@@ -185,7 +186,15 @@ class AMapSearch {
     final result =
         await _searchChannel.invokeMethod("tool#districtSearch", params);
 
-    return DistricthResult.fromJson(jsonDecode(result));
+    final json = jsonDecode(result);// district
+
+    if (json['district'] != null) {
+      final r = DistrictResultAndroid.fromJson(json);
+
+      return convertDistrictResult(r);
+    }
+
+    return DistrictResult.fromJson(json);
   }
 
   /// 公交站点查询

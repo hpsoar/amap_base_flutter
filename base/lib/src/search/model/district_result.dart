@@ -1,13 +1,13 @@
 
 import 'package:amap_base/amap_base.dart';
 
-class DistricthResult {
+class DistrictResult {
 	int count;
 	List<DistrictInfo> districts;
 
-	DistricthResult({this.count, this.districts});
+	DistrictResult({this.count, this.districts});
 
-	DistricthResult.fromJson(Map<String, dynamic> json) {
+	DistrictResult.fromJson(Map<String, dynamic> json) {
 		count = json['count'];
 		if (json['districts'] != null) {
 			districts = new List<DistrictInfo>();
