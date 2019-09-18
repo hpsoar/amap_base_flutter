@@ -31,8 +31,10 @@ class AMapSearch {
   }
 
   /// 搜索poi
-  Future<PoiResult> searchPoi(PoiSearchQuery query) {
+  Future<PoiResult> searchPoi(PoiSearchQuery query) async {
     L.p('方法searchPoi dart端参数: query.toJsonString() -> ${query.toJsonString()}');
+
+    final r = await districtSearch('');
 
     return _searchChannel
         .invokeMethod('search#searchPoi', {'query': query.toJsonString()})

@@ -331,7 +331,7 @@ object DistrictSearchHandler : SearchMethodHandler {
                 result?.error("没有搜索到结果", null, null)
             }
             else {
-                result.success(districtResult.toFieldJson())
+                result.success(districtResult.toAccessorJson())
             }
         }
 
