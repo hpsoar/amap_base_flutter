@@ -4,6 +4,8 @@ import com.amap.api.services.busline.BusStationQuery
 import com.amap.api.services.busline.BusStationSearch
 import com.amap.api.services.core.AMapException
 import com.amap.api.services.core.PoiItem
+import com.amap.api.services.district.DistrictSearch
+import com.amap.api.services.district.DistrictSearchQuery
 import com.amap.api.services.geocoder.*
 import com.amap.api.services.poisearch.PoiResult
 import com.amap.api.services.poisearch.PoiSearch
@@ -317,6 +319,30 @@ object DistanceSearchHandler : SearchMethodHandler {
         return LatLng(lat, lng)
     }
 }
+
+object DistrictSearchHandler : SearchMethodHandler {
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        val search = DistrictSearch(AMapBasePlugin.registrar.context())
+
+        search.setOnDistrictSearchListener { districtResult ->
+            search.setOnDistrictSearchListener(null)
+
+            if (districtResult.district.size == 0) {
+                result?.error("没有搜索到结果", null, null)
+            }
+            else {
+                result.success(districtResult.toFieldJson())
+            }
+        }
+
+        search.query = DistrictSearchQuery().apply {
+            this.keywords = call.argument("keywords")
+        }
+
+        search.searchDistrictAsyn()
+    }
+}
+
 
 object SearchBusStation : SearchMethodHandler {
 
