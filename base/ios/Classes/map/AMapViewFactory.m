@@ -13,7 +13,9 @@
 #import "MapHandlers.h"
 
 static NSString *mapChannelName = @"me.yohom/map";
-static NSString *markerClickedChannelName = @"me.yohom/marker_clicked";
+//static NSString *markerClickedChannelName = @"me.yohom/marker_clicked";
+
+static NSString *markerEventChannelName = @"me.yohom/marker_event";
 
 @interface MarkerEventHandler : NSObject <FlutterStreamHandler>
 @property(nonatomic) FlutterEventSink sink;
@@ -125,7 +127,7 @@ static NSString *markerClickedChannelName = @"me.yohom/marker_clicked";
   _mapView.delegate = weakSelf;
 
   _eventHandler = [[MarkerEventHandler alloc] init];
-  _markerClickedEventChannel = [FlutterEventChannel eventChannelWithName:[NSString stringWithFormat:@"%@%lld", markerClickedChannelName, _viewId]
+  _markerClickedEventChannel = [FlutterEventChannel eventChannelWithName:[NSString stringWithFormat:@"%@%lld", markerEventChannelName, _viewId]
                                                          binaryMessenger:[AMapBasePlugin registrar].messenger];
   [_markerClickedEventChannel setStreamHandler:_eventHandler];
 }
@@ -134,10 +136,32 @@ static NSString *markerClickedChannelName = @"me.yohom/marker_clicked";
 
 /// 点击annotation回调
 - (void)mapView:(MAMapView *)mapView didSelectAnnotationView:(MAAnnotationView *)view {
-  if ([view.annotation isKindOfClass:[MarkerAnnotation class]]) {
-    MarkerAnnotation *annotation = (MarkerAnnotation *) view.annotation;
-    _eventHandler.sink([annotation.markerOptions mj_JSONString]);
-  }
+    if ([view.annotation isKindOfClass:[MarkerAnnotation class]]) {
+        MarkerAnnotation *annotation = (MarkerAnnotation *) view.annotation;
+        NSDictionary *d = @{
+                            @"event": @"click",
+                            @"options": [annotation.markerOptions mj_keyValues],
+                            @"latitude": @(annotation.coordinate.latitude),
+                            @"longitude": @(annotation.coordinate.longitude),
+                            };
+        _eventHandler.sink([d mj_JSONString]);
+    }
+}
+
+- (void)mapView:(MAMapView *)mapView annotationView:(MAAnnotationView *)view didChangeDragState:(MAAnnotationViewDragState)newState
+   fromOldState:(MAAnnotationViewDragState)oldState {
+    if ([view.annotation isKindOfClass:[MarkerAnnotation class]]) {
+        MarkerAnnotation *annotation = (MarkerAnnotation *) view.annotation;
+        NSDictionary *d = @{
+                            @"event": @"drag",
+                            @"state0": @(oldState),
+                            @"state1": @(newState),
+                            @"options": [annotation.markerOptions mj_keyValues],
+                            @"latitude": @(annotation.coordinate.latitude),
+                            @"longitude": @(annotation.coordinate.longitude),
+                            };
+        _eventHandler.sink([d mj_JSONString]);
+    }
 }
 
 /// 渲染overlay回调
