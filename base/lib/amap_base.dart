@@ -35,7 +35,6 @@ export 'src/search/model/poi_search_query.dart';
 export 'src/search/model/poi_item.dart';
 export 'src/search/model/poi_result.dart';
 export 'src/search/model/district_result.dart';
-export 'src/search/model/district_result_android.dart';
 export 'src/search/model/regeocode_result.dart';
 export 'src/search/model/route_plan_param.dart';
 export 'src/search/model/route_poi_result.dart';

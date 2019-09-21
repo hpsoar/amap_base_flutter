@@ -238,7 +238,7 @@ class UnifiedPoiSearchQuery(
      * 关键字搜索
      */
     fun toPoiSearch(context: Context): PoiSearch {
-        return PoiSearch(context, PoiSearch.Query(query, category, city).apply {
+        val search = PoiSearch(context, PoiSearch.Query(query, category, city).apply {
             building = this@UnifiedPoiSearchQuery.building
             pageNum = this@UnifiedPoiSearchQuery.pageNum
             pageSize = this@UnifiedPoiSearchQuery.pageSize
@@ -247,6 +247,10 @@ class UnifiedPoiSearchQuery(
             isDistanceSort = this@UnifiedPoiSearchQuery.distanceSort
             location = this@UnifiedPoiSearchQuery.location?.toLatLonPoint()
         })
+
+        search.bound = searchBound?.toSearchBoundCenterRange()
+
+        return search
     }
 
     /**
