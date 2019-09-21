@@ -75,3 +75,4 @@ class AMap {
     return _channel.invokeMethod('setKey', {'key': key});
   }
 }
+
