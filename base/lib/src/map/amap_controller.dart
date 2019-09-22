@@ -260,7 +260,7 @@ class AMapController {
   //endregion
 
   /// marker点击事件流
-  Stream<MarkerOptions> get markerClickedEvent => _markerClickedEventChannel
+ Stream<MarkerEvent> get markerClickedEvent => _markerClickedEventChannel
       .receiveBroadcastStream()
-      .map((data) => MarkerOptions.fromJson(jsonDecode(data)));
+      .map((data) => MarkerEvent.fromJson(jsonDecode(data)));
 }

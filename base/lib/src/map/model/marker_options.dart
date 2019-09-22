@@ -257,3 +257,34 @@ class MarkerOptions {
     return 'MarkerOptions{icon: $icon, icons: $icons, alpha: $alpha, anchorU: $anchorU, anchorV: $anchorV, draggable: $draggable, infoWindowEnable: $infoWindowEnable, period: $period, position: $position, rotateAngle: $rotateAngle, isFlat: $isFlat, isGps: $isGps, infoWindowOffsetX: $infoWindowOffsetX, infoWindowOffsetY: $infoWindowOffsetY, snippet: $snippet, title: $title, visible: $visible, autoOverturnInfoWindow: $autoOverturnInfoWindow, zIndex: $zIndex, displayLevel: $displayLevel, belowMaskLayer: $belowMaskLayer, lockedToScreen: $lockedToScreen, lockedScreenPoint: $lockedScreenPoint, customCalloutView: $customCalloutView, enabled: $enabled, highlighted: $highlighted, selected: $selected, leftCalloutAccessoryView: $leftCalloutAccessoryView, rightCalloutAccessoryView: $rightCalloutAccessoryView}';
   }
 }
+
+
+class MarkerEvent {
+  MarkerOptions options;
+  String event;
+  double latitude;
+  double longitude;
+
+  MarkerEvent({this.event, this.options, this.longitude, this.latitude});
+
+  MarkerEvent.fromJson(Map<String, Object> json) {
+    event = json['event'];
+    latitude = json['latitude'];
+    longitude = json['longitude'];
+    if (json['options'] != null) {
+      options = MarkerOptions.fromJson(jsonDecode(json['options']));
+    }
+  }
+
+  Map<String, Object> toJson() {
+    var m = {
+      'event': event,
+      'latitude': latitude,
+      'longitude': longitude
+    };
+    if (options != null) {
+      m['options'] = json.encode(options.toJson());
+    }
+    return m;
+  }
+}
