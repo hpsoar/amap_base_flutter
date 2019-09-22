@@ -140,7 +140,7 @@ static NSString *markerEventChannelName = @"me.yohom/marker_event";
         MarkerAnnotation *annotation = (MarkerAnnotation *) view.annotation;
         NSDictionary *d = @{
                             @"event": @"click",
-                            @"options": [annotation.markerOptions mj_keyValues],
+                            @"options": [annotation.markerOptions mj_JSONString],
                             @"latitude": @(annotation.coordinate.latitude),
                             @"longitude": @(annotation.coordinate.longitude),
                             };
@@ -152,11 +152,19 @@ static NSString *markerEventChannelName = @"me.yohom/marker_event";
    fromOldState:(MAAnnotationViewDragState)oldState {
     if ([view.annotation isKindOfClass:[MarkerAnnotation class]]) {
         MarkerAnnotation *annotation = (MarkerAnnotation *) view.annotation;
+        NSString *event = @"";
+        if (newState == MAAnnotationViewDragStateStarting) {
+            event = @"drag_begin";
+        } else if (newState == MAAnnotationViewDragStateEnding) {
+            event = @"drag_end";
+        } else if (newState == MAAnnotationViewDragStateDragging) {
+            event = @"drag";
+        } else if (newState == MAAnnotationViewDragStateCanceling) {
+            event = @"drag_cancel";
+        }
         NSDictionary *d = @{
-                            @"event": @"drag",
-                            @"state0": @(oldState),
-                            @"state1": @(newState),
-                            @"options": [annotation.markerOptions mj_keyValues],
+                            @"event": event,
+                            @"options": [annotation.markerOptions mj_JSONString],
                             @"latitude": @(annotation.coordinate.latitude),
                             @"longitude": @(annotation.coordinate.longitude),
                             };

@@ -6,8 +6,10 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import com.amap.api.maps.AMap
 import com.amap.api.maps.AMapOptions
 import com.amap.api.maps.TextureMapView
+import com.amap.api.maps.model.Marker
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.StandardMessageCodec
@@ -17,10 +19,11 @@ import me.yohom.amapbase.*
 import me.yohom.amapbase.AMapBasePlugin.Companion.registrar
 import me.yohom.amapbase.common.parseFieldJson
 import me.yohom.amapbase.common.toFieldJson
+import org.json.JSONObject
 import java.util.concurrent.atomic.AtomicInteger
 
 const val mapChannelName = "me.yohom/map"
-const val markerClickedChannelName = "me.yohom/marker_clicked"
+const val markerClickedChannelName = "me.yohom/marker_event"
 const val success = "调用成功"
 
 class AMapFactory(private val activityState: AtomicInteger)
@@ -95,10 +98,53 @@ class AMapView(context: Context,
 
             override fun onCancel(p0: Any?) {}
         })
+
         mapView.map.setOnMarkerClickListener {
-            eventSink?.success(UnifiedMarkerOptions(it.options).toFieldJson())
+            var o = JSONObject()
+            o.put("event", "click")
+            o.put("latitude", it.position.latitude)
+            o.put("longitude", it.position.longitude)
+            o.put("options", UnifiedMarkerOptions(it.options).toFieldJson())
+
+            eventSink?.success(o.toString())
             true
         }
+
+        mapView.map.setOnMarkerDragListener(object: AMap.OnMarkerDragListener{
+            override fun onMarkerDragStart(it: Marker?) {
+                var o = JSONObject();
+                o.put("event", "drag_start");
+
+                if (it != null) {
+                    o.put("latitude", it.position.latitude)
+                    o.put("longitude", it.position.longitude)
+                    o.put("options", UnifiedMarkerOptions(it.options).toFieldJson())
+                }
+                eventSink?.success(o.toString())
+            }
+
+            override fun onMarkerDrag(it: Marker?) {
+                var o = JSONObject();
+                o.put("event", "drag");
+                if (it != null) {
+                    o.put("latitude", it.position.latitude)
+                    o.put("longitude", it.position.longitude)
+                    o.put("options", UnifiedMarkerOptions(it.options).toFieldJson())
+                }
+                eventSink?.success(o.toString())
+            }
+
+            override fun onMarkerDragEnd(it: Marker?) {
+                var o = JSONObject();
+                o.put("event", "drag_end");
+                if (it != null) {
+                    o.put("latitude", it.position.latitude)
+                    o.put("longitude", it.position.longitude)
+                    o.put("options", UnifiedMarkerOptions(it.options).toFieldJson())
+                }
+                eventSink?.success(o.toString())
+            }
+        })
 
         // 注册生命周期
         registrar.activity().application.registerActivityLifecycleCallbacks(this)
