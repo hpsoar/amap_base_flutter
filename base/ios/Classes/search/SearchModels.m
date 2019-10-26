@@ -532,7 +532,7 @@
     request.keywords = _query;
     request.city = _city;
     request.cityLimit = _cityLimit;
-    request.location = _location;
+    request.location = _location;    
     return request;
 }
 

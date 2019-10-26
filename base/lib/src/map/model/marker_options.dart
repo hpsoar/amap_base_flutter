@@ -92,6 +92,14 @@ class MarkerOptions {
   /// 显示在默认弹出框右侧的view [iOS暂未实现]
   String rightCalloutAccessoryView;
 
+  String content;
+
+  LatLng iconSize;
+
+  LatLng contentSize;
+
+  int contentColor;
+
   MarkerOptions({
     @required this.position,
     this.icon,
@@ -122,6 +130,10 @@ class MarkerOptions {
     this.selected = false,
     this.leftCalloutAccessoryView,
     this.rightCalloutAccessoryView,
+    this.content,
+    this.contentSize,
+    this.iconSize,
+    this.contentColor,
   });
 
   MarkerOptions.fromJson(Map<String, Object> json) {
@@ -147,6 +159,11 @@ class MarkerOptions {
     title = json['title'] as String;
     visible = json['visible'] as bool;
     zIndex = json['zIndex'] as num;
+
+    content = json['content'];
+    iconSize = json['iconSize'] != null ? LatLng.fromJson(json['iconSize']) : null;
+    contentSize = json['contentSize'] != null ? LatLng.fromJson(json['contentSize']) : null;
+    contentColor = json['contentColor'];
   }
 
   Map<String, Object> toJson() {
@@ -160,6 +177,10 @@ class MarkerOptions {
       'infoWindowEnable': infoWindowEnable,
       'period': period,
       'position': position,
+      'content': content,
+      'iconSize': iconSize,
+      'contentSize': contentSize,
+      'contentColor': contentColor,
       'rotateAngle': rotateAngle,
       'isFlat': isFlat,
       'isGps': isGps,
@@ -288,3 +309,4 @@ class MarkerEvent {
     return m;
   }
 }
+

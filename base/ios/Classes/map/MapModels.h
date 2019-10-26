@@ -127,6 +127,14 @@
 /// 显示在默认弹出框右侧的view [暂未实现]
 @property(nonatomic) NSString *rightCalloutAccessoryView;
 
+@property(nonatomic) NSString *content;
+
+@property (nonatomic) LatLng *iconSize;
+
+@property (nonatomic) LatLng *contentSize;
+
+@property (nonatomic) NSInteger contentColor;
+
 - (NSString *)description;
 
 @end

@@ -378,7 +378,7 @@
         MarkerAnnotation *annotation = [[MarkerAnnotation alloc] init];
         annotation.coordinate = [options.position toCLLocationCoordinate2D];
         annotation.title = options.title;
-        annotation.subtitle = options.snippet;
+        annotation.subtitle = options.snippet;        
         annotation.markerOptions = options;
 
         [optionList addObject:annotation];
