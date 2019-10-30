@@ -14,7 +14,7 @@
     <TextView
         android:textAlignment="center"
         android:id="@+id/custom_marker_text"
-        android:textSize="14sp"
+        android:textSize="14dp"
         android:layout_width="50dp"
         android:layout_height="50dp" />
    </FrameLayout>

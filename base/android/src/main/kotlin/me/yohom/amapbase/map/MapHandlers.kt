@@ -3,6 +3,7 @@ package me.yohom.amapbase.map
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.util.TypedValue
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -346,7 +347,11 @@ object AddMarker : MapMethodHandler {
         textView.layoutParams = getLayoutParameters(context, contentSize)
 
         if (options.contentColor != null) {
-            textView.setTextColor((options.contentColor as Long).toInt())
+            textView.setTextColor((options.contentColor).toInt())
+        }
+
+        if (options.fontSize != null) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, options.fontSize)
         }
 
         val bitmap = convertViewToBitmap(view)

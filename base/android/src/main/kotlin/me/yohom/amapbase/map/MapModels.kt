@@ -106,6 +106,8 @@ class UnifiedMarkerOptions(
 
         val contentColor: Long?,
 
+        val fontSize: Float?,
+
         var bitmap: BitmapDescriptor?
 ) {
     constructor(options: MarkerOptions) : this(
@@ -134,7 +136,8 @@ class UnifiedMarkerOptions(
             iconSize =  null,
             contentSize = null,
             bitmap = null,
-            contentColor = null
+            contentColor = null,
+            fontSize = null
     )
 
     fun applyTo(map: AMap) {
