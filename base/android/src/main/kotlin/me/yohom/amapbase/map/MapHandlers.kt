@@ -1,20 +1,25 @@
 package me.yohom.amapbase.map
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import com.amap.api.maps.AMap
 import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.CoordinateConverter
-import com.amap.api.maps.model.CameraPosition
-import com.amap.api.maps.model.LatLng
-import com.amap.api.maps.model.LatLngBounds
+import com.amap.api.maps.model.*
 import com.amap.api.maps.offlinemap.OfflineMapActivity
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import me.yohom.amapbase.AMapBasePlugin
 import me.yohom.amapbase.AMapBasePlugin.Companion.registrar
 import me.yohom.amapbase.MapMethodHandler
+import me.yohom.amapbase.R
 import me.yohom.amapbase.common.log
 import me.yohom.amapbase.common.parseFieldJson
 import me.yohom.amapbase.common.toFieldJson
@@ -310,9 +315,58 @@ object AddMarker : MapMethodHandler {
 
         log("方法marker#addMarker android端参数: optionsJson -> $optionsJson")
 
-        optionsJson.parseFieldJson<UnifiedMarkerOptions>().applyTo(map)
+        val options = optionsJson.parseFieldJson<UnifiedMarkerOptions>()
+
+        processCustomMarkerOption(registrar.context(), options)
+
+        options.applyTo(map)
 
         result.success(success)
+    }
+
+    private fun processCustomMarkerOption(context: Context, options: UnifiedMarkerOptions) {
+        if (options.content == null && options.iconSize != null && options.contentSize != null) {
+            return
+        }
+
+        val view = View.inflate(context, R.layout.custom_marker, null)
+        val textView = view.findViewById(R.id.custom_marker_text) as TextView
+        val imageView = view.findViewById(R.id.custom_marker_icon) as ImageView
+
+        val icon = UnifiedAssets.getBitmapDescriptor(options.icon as String)
+        imageView.setImageBitmap(icon.bitmap)
+
+        val iconSize = options.iconSize as LatLng
+
+        imageView.layoutParams = getLayoutParameters(context, iconSize)
+
+        val contentSize = options.contentSize as LatLng
+
+        textView.setText(options.content)
+        textView.layoutParams = getLayoutParameters(context, contentSize)
+
+        if (options.contentColor != null) {
+            textView.setTextColor((options.contentColor as Long).toInt())
+        }
+
+        val bitmap = convertViewToBitmap(view)
+        options.bitmap = BitmapDescriptorFactory.fromBitmap(bitmap)
+    }
+
+    fun getLayoutParameters(context: Context, size: LatLng): FrameLayout.LayoutParams {
+        val scale = context.getResources().getDisplayMetrics().density
+        val width = (size.latitude * scale + 0.5f)
+        val height = (size.longitude * scale + 0.5f)
+
+        return FrameLayout.LayoutParams(width.toInt(), height.toInt())
+    }
+
+    //view 转bitmap
+    fun convertViewToBitmap(view: View): Bitmap {
+        view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+        view.layout(0, 0, view.measuredWidth, view.measuredHeight)
+        view.buildDrawingCache()
+        return view.drawingCache
     }
 }
 

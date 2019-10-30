@@ -7,7 +7,7 @@ import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.*
 import me.yohom.amapbase.common.hexStringToColorInt
 import java.util.*
-
+import com.amap.api.maps.model.MarkerOptions
 
 /**
  * 由于高德的AMapOption被混淆了, 无法通过Gson直接反序列化, 这里用这个类过渡一下
@@ -56,7 +56,7 @@ class UnifiedAMapOptions(
 
 class UnifiedMarkerOptions(
         /// Marker覆盖物的图标
-        private val icon: String?,
+        val icon: String?,
         /// Marker覆盖物的动画帧图标列表，动画的描点和大小以第一帧为准，建议图片大小保持一致
         private val icons: List<String>,
         /// Marker覆盖物的透明度
@@ -96,7 +96,17 @@ class UnifiedMarkerOptions(
         /// 显示等级 缺少文档
         private val displayLevel: Int,
         /// 是否在掩层下 缺少文档
-        private val belowMaskLayer: Boolean
+        private val belowMaskLayer: Boolean,
+
+        val contentSize: LatLng?,
+
+        val iconSize: LatLng?,
+
+        val content: String?,
+
+        val contentColor: Long?,
+
+        var bitmap: BitmapDescriptor?
 ) {
     constructor(options: MarkerOptions) : this(
             icon = options.icon.toString(),
@@ -119,7 +129,12 @@ class UnifiedMarkerOptions(
             autoOverturnInfoWindow = options.isInfoWindowAutoOverturn,
             zIndex = options.zIndex,
             displayLevel = options.displayLevel,
-            belowMaskLayer = options.isBelowMaskLayer
+            belowMaskLayer = options.isBelowMaskLayer,
+            content = null,
+            iconSize =  null,
+            contentSize = null,
+            bitmap = null,
+            contentColor = null
     )
 
     fun applyTo(map: AMap) {
@@ -147,7 +162,10 @@ class UnifiedMarkerOptions(
             .displayLevel(displayLevel)
             .belowMaskLayer(belowMaskLayer)
             .apply {
-                if (this@UnifiedMarkerOptions.icon != null) {
+                if (this@UnifiedMarkerOptions.bitmap != null) {
+                    icon(this@UnifiedMarkerOptions.bitmap)
+                }
+                else if (this@UnifiedMarkerOptions.icon != null) {
                     icon(UnifiedAssets.getBitmapDescriptor(this@UnifiedMarkerOptions.icon))
                 } else {
                     icon(UnifiedAssets.getDefaultBitmapDescriptor("images/default_marker.png"))
