@@ -326,7 +326,7 @@ object AddMarker : MapMethodHandler {
     }
 
     private fun processCustomMarkerOption(context: Context, options: UnifiedMarkerOptions) {
-        if (options.content == null && options.iconSize != null && options.contentSize != null) {
+        if (options.content == null && options.iconSize == null && options.contentSize == null) {
             return
         }
 
