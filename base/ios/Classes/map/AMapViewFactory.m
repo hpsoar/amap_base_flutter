@@ -172,6 +172,8 @@ static NSString *markerEventChannelName = @"me.yohom/marker_event";
     }
 }
 
+#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
+
 /// 渲染overlay回调
 - (MAOverlayRenderer *)mapView:(MAMapView *)mapView rendererForOverlay:(id <MAOverlay>)overlay {
   // 绘制折线
@@ -193,12 +195,20 @@ static NSString *markerEventChannelName = @"me.yohom/marker_event";
     }
 
     return polylineRenderer;
+  } else if ([overlay isKindOfClass:[CircleOverlay class]]) {
+      CircleOverlay *circle = (CircleOverlay *) overlay;
+      
+      MACircleRenderer *polylineRenderer = [[MACircleRenderer alloc] initWithCircle:circle];
+      
+      UnifiedCircleOptions *options = [circle options];
+      
+      polylineRenderer.fillColor = [options.color hexStringToColor];
+      
+      return polylineRenderer;
   }
 
   return nil;
 }
-
-#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 
 /// 渲染annotation, 就是Android中的marker
 - (MAAnnotationView *)mapView:(MAMapView *)mapView viewForAnnotation:(id <MAAnnotation>)annotation {
@@ -252,6 +262,8 @@ static NSString *markerEventChannelName = @"me.yohom/marker_event";
         }
         
         if (annotationView.image != nil) {
+            annotationView.centerOffset = CGPointMake(0, -18);
+            
             CGSize size = annotationView.imageView.frame.size;
             CGFloat width = 36;
             CGFloat height = 36;
@@ -265,11 +277,13 @@ static NSString *markerEventChannelName = @"me.yohom/marker_event";
                 
                 UILabel *lbl = [annotationView viewWithTag:100];
                 lbl.frame = CGRectMake(0, 0, options.contentSize.latitude, options.contentSize.longitude);
-            } else {
                 
+                if (options.offset) {
+                    annotationView.centerOffset = CGPointMake(options.offset.latitude, options.offset.longitude);
+                }
+            } else {
             }
-            annotationView.frame = CGRectMake(annotationView.center.x + size.width / 2, annotationView.center.y, width, height);
-            annotationView.centerOffset = CGPointMake(0, -18);
+            annotationView.frame = CGRectMake(annotationView.center.x + size.width / 2, annotationView.center.y, width, height); 
         }
 
     return annotationView;

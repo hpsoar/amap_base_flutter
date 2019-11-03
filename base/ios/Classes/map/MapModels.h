@@ -10,6 +10,7 @@
 @class LatLng;
 @class CameraPosition;
 @class UnifiedPolylineOptions;
+@class UnifiedCircleOptions;
 @class MAMapView;
 
 
@@ -22,6 +23,9 @@
 @property(nonatomic) UnifiedPolylineOptions *options;
 @end
 
+@interface CircleOverlay : MACircle
+@property(nonatomic) UnifiedCircleOptions *options;
+@end
 
 @interface UnifiedAMapOptions : NSObject
 /// “高德地图”Logo的位置
@@ -133,6 +137,8 @@
 
 @property (nonatomic) LatLng *contentSize;
 
+@property (nonatomic) LatLng *offset;
+
 @property (nonatomic) NSInteger contentColor;
 
 - (NSString *)description;
@@ -200,6 +206,29 @@
 
 @end
 
+
+@interface UnifiedCircleOptions : NSObject
+
++ (instancetype)initWithJson:(NSString *)json;
+
+/// 顶点
+@property(nonatomic) LatLng *center;
+
+/// 线段的颜色
+@property(nonatomic) NSString *color;
+
+/// 线段的Z轴值
+@property(nonatomic) CGFloat zIndex;
+
+@property(nonatomic) CGFloat radius;
+
+/// 线段的可见属性
+@property(nonatomic) BOOL isVisible;
+
+/// 线段是否使用纹理贴图
+@property(nonatomic) BOOL isUseTexture;
+
+@end
 
 @interface UnifiedUiSettings: NSObject
 /// 设置缩放按钮的位置

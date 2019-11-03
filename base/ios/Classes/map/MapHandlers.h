@@ -63,6 +63,8 @@
 @interface AddPolyline : NSObject<MapMethodHandler>
 @end
 
+@interface AddCircle : NSObject<MapMethodHandler>
+@end
 
 @interface ClearMarker : NSObject<MapMethodHandler>
 @end
