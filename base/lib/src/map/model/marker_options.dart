@@ -96,6 +96,8 @@ class MarkerOptions {
 
   LatLng iconSize;
 
+  LatLng offset;
+
   LatLng contentSize;
 
   int contentColor;
@@ -134,6 +136,7 @@ class MarkerOptions {
     this.contentSize,
     this.iconSize,
     this.contentColor,
+    this.offset,
   });
 
   MarkerOptions.fromJson(Map<String, Object> json) {
@@ -164,6 +167,7 @@ class MarkerOptions {
     iconSize = json['iconSize'] != null ? LatLng.fromJson(json['iconSize']) : null;
     contentSize = json['contentSize'] != null ? LatLng.fromJson(json['contentSize']) : null;
     contentColor = json['contentColor'];
+    offset = json['offset'] != null ? LatLng.fromJson(json['offset']) : null;
   }
 
   Map<String, Object> toJson() {
@@ -179,6 +183,7 @@ class MarkerOptions {
       'position': position,
       'content': content,
       'iconSize': iconSize,
+      'offset': offset,
       'contentSize': contentSize,
       'contentColor': contentColor,
       'rotateAngle': rotateAngle,

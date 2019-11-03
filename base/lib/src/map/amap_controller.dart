@@ -171,6 +171,16 @@ class AMapController {
     );
   }
 
+  /// 添加线
+  Future addCircle(CircleOptions options) {
+    L.p('addCircle dart端参数: options -> $options');
+
+    return _mapChannel.invokeMethod(
+      'map#addCircle',
+      {'options': options.toJsonString()},
+    );
+  }
+
   /// 移动镜头到当前的视角
   Future zoomToSpan(
     List<LatLng> bound, {
