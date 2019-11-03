@@ -341,19 +341,23 @@ object AddMarker : MapMethodHandler {
 
         imageView.layoutParams = getLayoutParameters(context, iconSize)
 
-        val contentSize = options.contentSize as LatLng
+        if (options.content != null) {
+            val contentSize = options.contentSize as LatLng
 
-        textView.setText(options.content)
-        textView.layoutParams = getLayoutParameters(context, contentSize)
+            textView.setText(options.content)
+            textView.layoutParams = getLayoutParameters(context, contentSize)
 
-        if (options.contentColor != null) {
-            textView.setTextColor((options.contentColor).toInt())
+            if (options.contentColor != null) {
+                textView.setTextColor((options.contentColor).toInt())
+            }
+
+            if (options.fontSize != null) {
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, options.fontSize)
+            }
+        } else {
+            textView.visibility = View.GONE
         }
-
-        if (options.fontSize != null) {
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, options.fontSize)
-        }
-
+        
         val bitmap = convertViewToBitmap(view)
         options.bitmap = BitmapDescriptorFactory.fromBitmap(bitmap)
     }
