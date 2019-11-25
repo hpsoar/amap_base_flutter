@@ -13,6 +13,7 @@
         />
     <TextView
         android:textAlignment="center"
+        android:gravity="center"
         android:id="@+id/custom_marker_text"
         android:textSize="14dp"
         android:layout_width="50dp"
